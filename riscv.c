@@ -5,6 +5,7 @@
 #include "tokenizer.h" // Create header file and reference that
 #include "memory.h" // built-in functions to read and write to a specific file
 
+
 int32_t* reg; // Array of 32 32-bit registers
 
 void init_regs();
@@ -23,50 +24,87 @@ void init_regs(){
 		reg[i] = i;
 }
 
+/*
+ * Check two strings if equivalent
+ */
+bool same(char* string1, char* string2){
+	int x = 0;
+	int y = 0;
+	
+	while(string1[x] != '\0' || string2[y] != '\0'){
+		if(string1[x] != string2[y]){ 
+      		return false;
+      }
+		if(string1[x] != '\0'){ 
+      		++x;
+      }
+		if(string2[y] != '\0'){
+      		++y;
+      }
 
+	}
+	return(y != x); 
 
+} 
+/*
+ * Convert decimal to hex bc every address is represented in hex
+ */
+int32_t to_hex(int decimal){
+	char hex[32]; 
+	return (int32_t)strtol(hex, NULL, 16);
+}
 /**
- * Fill out this function and use it to read interpret user input to execute RV64 instructions.
+ * Fill out this function and use it to read interpret user input to execute RV32 instructions.
  * You may expect that a single, properly formatted RISC-V instruction string will be passed
  * as a parameter to this function.
  */
 bool interpret(char* instr){
-	char deli = ' ';	
-	char** tokens = tokenize(instr,deli);
 
-	//“SW X5 2000(X0)”
+	char deli = ' ';
+  	char** tokens = tokenize(instr,deli);
 
-	if (tokens[0] == 'LW'){
+	if(same(tokens[0], "LW")){
 
+		int32_t mem_address = atoi(tokens[2]);
+		int32_t read_data = read_address(to_hex(mem_address), "mem.txt");
+		reg[atoi(tokens[1])] = read_data;
 
-	}
-	else if (tokens[0]== 'SW'){
-
-	}
-
-	else if (tokens[0] == 'ADD'){
-
-	}
-	else if (tokens[0] == 'ADDI'){
-
-	}
-
-	else if (tokens[0] == 'AND'){
-
-	}
-	else if (tokens[0] == 'OR'){
-
-	}
-	else if (tokens[0] == 'XOR'){
-
-	} 
-	else {
-		printf("No Instruction found");
-		return false;
-	}
+   		return true;
+  	}
+	if(same(tokens[0], "SW")){ 
 	
-}
+		int32_t mem_address = atoi(tokens[2]); 
+		write_address(reg[atoi(tokens[1])], to_hex(mem_address), "mem.txt");
+  		return true;
+  	}
+	if(same(tokens[0], "ADD")){
 
+		reg[atoi(tokens[1])] = reg[atoi(tokens[2])] + atoi(tokens[3]);
+		return true;
+  	}
+	if(same(tokens[0], "ADDI")){
+
+		reg[atoi(tokens[1])] = atoi(tokens[2]) + atoi(tokens[3]);
+  		return true;
+  	}
+	if(same(tokens[0], "AND")){
+			
+		reg[atoi(tokens[1])] = reg[atoi(tokens[2])] && reg[atoi(tokens[3])];
+   		return true;
+  	}
+	if(same(tokens[0], "OR")){ 
+		reg[atoi(tokens[1])] = reg[atoi(tokens[2])] || reg[atoi(tokens[3])];
+  		return true;
+  	}
+	if(same(tokens[0], "XOR")){ 
+		reg[atoi(tokens[1])] = reg[atoi(tokens[2])] ^ reg[atoi(tokens[3])];
+  		return true;
+  	}
+	else{
+		return false;
+		printf("No Instruction found");
+	}
+}
 
 /**
  * Simple demo program to show the usage of read_address() and write_address() found in memory.c
@@ -112,7 +150,7 @@ int main(){
 	print_regs();
 
 	// Below is a sample program to a write-read. Overwrite this with your own code.
-	//write_read_demo();
+	write_read_demo();
 
 	printf(" RV32 Interpreter.\nType RV32 instructions. Use upper-case letters and space as a delimiter.\nEnter 'EOF' character to end program\n");
 
@@ -134,3 +172,4 @@ int main(){
 
 	return 0;
 }
+
